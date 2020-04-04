@@ -29,7 +29,12 @@ if [ -r /.firstboot.tmp ]; then
         chown -R www-data:www-data /var/www/MISP/app/Config
         chmod -R 750 /var/www/MISP/app/Config
         cd /var/www/MISP/app/files        
-        chown -R www-data:www-data misp-objects misp-galaxy warninglists taxonomies        
+        chown -R www-data:www-data misp-objects misp-galaxy warninglists taxonomies
+
+        # Fix repository permissions to allow update of submodules (objects, galaxy, taxonomies...)
+        cd /var/www/MISP
+        sudo -u www-data git pull origin 2.4
+        sudo -u www-data git submodule update -f
 
         echo "Configuring PHP settings..."
         # Fix php.ini with recommended settings
