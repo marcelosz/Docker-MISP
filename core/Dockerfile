@@ -156,7 +156,6 @@ RUN a2dissite 000-default
 #
 RUN apt-get update && apt-get install -y --no-install-recommends \
     supervisor \
-    redis-server \
     postfix \    
     cron \
     logrotate \
@@ -226,9 +225,6 @@ RUN cp /var/www/MISP/INSTALL/misp.logrotate /etc/logrotate.d/misp
 # Preconfigure setting for packages
 RUN echo "postfix postfix/main_mailer_type string Local only" | debconf-set-selections
 RUN echo "postfix postfix/mailname string localhost.localdomain" | debconf-set-selections
-
-# Redis Setup
-RUN sed -i 's/^\(daemonize\s*\)yes\s*$/\1no/g' /etc/redis/redis.conf
 
 # Apache Setup
 RUN cp /var/www/MISP/INSTALL/apache.misp.ubuntu /etc/apache2/sites-available/misp.conf

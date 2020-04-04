@@ -1,11 +1,16 @@
 version: '2'
 
 services:
-  smtp_relay:
+  mail:
     # This is a SMTP docker container for sending emails. Can also relay emails to GMail and Amazon SES.
     # See: https://hub.docker.com/r/namshi/smtp
-    container_name: misp_smtp_relay
+    container_name: misp_mail
     image: namshi/smtp  
+
+  redis:
+    container_name: misp_redis    
+    image: redis:5.0
+    restart: unless-stopped    
 
   db:
     container_name: misp_db
@@ -24,7 +29,8 @@ services:
   core:
     depends_on:
       - db
-      - smtp_relay
+      - redis
+      - mail
     container_name: misp_core
     image: marcelosz/misp:latest
     restart: unless-stopped
