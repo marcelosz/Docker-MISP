@@ -28,10 +28,7 @@ if [ -r /.firstboot.tmp ]; then
         echo "[-] INFO: chmod -R g+ws /var/www/MISP/app/tmp ..." && chmod -R g+ws /var/www/MISP/app/tmp
         echo "[-] INFO: chmod -R g+ws /var/www/MISP/app/files ..." && chmod -R g+ws /var/www/MISP/app/files
         echo "[-] INFO: chmod -R g+ws /var/www/MISP/app/files/scripts/tmp ..." && chmod -R g+ws /var/www/MISP/app/files/scripts/tmp
-        
         echo "[-] INFO: chmod +x /var/www/MISP/app/Console/cake ..." && chmod +x /var/www/MISP/app/Console/cake
-        #echo "[-] INFO: chown -R www-data:www-data /var/www/MISP/app/Config && chmod -R 750 /var/www/MISP/app/Config ..." && chown -R www-data:www-data /var/www/MISP/app/Config && chmod -R 750 /var/www/MISP/app/Config
-        #echo "[-] INFO: cd /var/www/MISP/app/files && chown -R www-data:www-data misp-objects misp-galaxy warninglists taxonomies ..." &&  cd /var/www/MISP/app/files && chown -R www-data:www-data misp-objects misp-galaxy warninglists taxonomies
         # Fix repository permissions to allow update of submodules (objects, galaxy, taxonomies...)
         echo "[*] Updating MISP local repository and submodule permissions..."
         cd /var/www/MISP
@@ -136,6 +133,20 @@ if [ -r /.firstboot.tmp ]; then
         echo "[-] INFO: Adjusting other MISP settings..."        
         /var/www/MISP/app/Console/cake Admin setSetting "MISP.python_bin" $(which python3)
 
+# TODO
+        #echo "/var/www/MISP/app/Console/cake Password 'admin@admin.test' '@dmin1!'" >> /root/init-db ; \
+
+#     /var/www/MISP/app/Console/cake Admin setSetting "Plugin.Enrichment_services_enable" true
+#     /var/www/MISP/app/Console/cake Admin setSetting "Plugin.Enrichment_services_url" "http://misp-modules"
+
+#     /var/www/MISP/app/Console/cake Admin setSetting "Plugin.Import_services_enable" true
+#     /var/www/MISP/app/Console/cake Admin setSetting "Plugin.Import_services_url" "http://misp-modules"
+
+#     /var/www/MISP/app/Console/cake Admin setSetting "Plugin.Export_services_enable" true
+#     /var/www/MISP/app/Console/cake Admin setSetting "Plugin.Export_services_url" "http://misp-modules"
+
+#     /var/www/MISP/app/Console/cake Admin setSetting "Plugin.Cortex_services_enable" false
+
         # Generate the admin user PGP key
         echo "[*] Creating admin GnuPG key..."
         if [ -z "$MISP_ADMIN_EMAIL" -o -z "$MISP_ADMIN_PASSPHRASE" ]; then
@@ -170,6 +181,10 @@ Don't forget to:
 __WELCOME__
         rm -f /.firstboot.tmp
 fi
+
+# Start misp-modules
+#ENTRYPOINT [ "/usr/local/bin/misp-modules", "-l", "0.0.0.0"]
+#sudo -u www-data /usrmisp-modules -s -l 127.0.0.1 &" >>/etc/rc.local
 
 # Start supervisord
 echo "[*] Starting supervisord..."
