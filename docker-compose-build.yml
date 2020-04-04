@@ -1,0 +1,7 @@
+version: '3'
+
+services:
+  misp:
+    image: marcelosz/misp:latest
+    build:
+        context: core/.

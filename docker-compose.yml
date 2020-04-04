@@ -1,0 +1,48 @@
+version: '2'
+
+services:
+  smtp_relay:
+    # This is a SMTP docker container for sending emails. Can also relay emails to GMail and Amazon SES.
+    # See: https://hub.docker.com/r/namshi/smtp
+    container_name: misp_smtp_relay
+    image: namshi/smtp  
+
+  db:
+    container_name: misp_db
+    image: mysql/mysql-server:5.7
+    restart: unless-stopped
+    hostname: ${MYSQL_HOST}
+    volumes:
+      - ${DATA_DIR}/db:/var/lib/mysql
+    environment:
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+
+  core:
+    depends_on:
+      - db
+      - smtp_relay
+    container_name: misp_core
+    image: marcelosz/misp:latest
+    restart: unless-stopped
+    volumes:
+      - /dev/urandom:/dev/random
+      - ${DATA_DIR}/core/web:/var/www/MISP
+    ports:
+      - 80:80
+    environment:
+      - MYSQL_HOST=${MYSQL_HOST}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_MISP_USER=${MYSQL_USER}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_MISP_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_ROOT_USER=${MYSQL_ROOT_USER}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MISP_ADMIN_EMAIL=${MISP_ADMIN_EMAIL}
+      - MISP_ADMIN_PASSPHRASE=${MISP_ADMIN_PASSPHRASE}
+      - MISP_BASEURL=${MISP_BASEURL}
+      - POSTFIX_RELAY_HOST=${POSTFIX_RELAY_HOST}
+      - TIMEZONE=${TIMEZONE}
