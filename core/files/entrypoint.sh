@@ -6,20 +6,33 @@
 
 set -e
 
+echo "[*] Starting entrypoint.sh"
+
 if [ -r /.firstboot.tmp ]; then
-        echo "Container started for the fist time. Setup might time a few minutes. Please wait..."
-        echo "(Details are logged in /tmp/install.log)"
+        echo "[*] Container started for the fist time. Setup might time a few minutes."
+        echo "[*] (Details are logged in /tmp/install.log)"
         export DEBIAN_FRONTEND=noninteractive
 
         # If the user uses a mount point restore our files
         if [ ! -d /var/www/MISP/app ]; then
-                echo "Restoring MISP files..."
+                echo "[*] Restoring MISP files..."
                 cd /var/www/MISP
                 tar xzpf /root/MISP.tgz
                 rm /root/MISP.tgz
         fi
 
         # Fix permissions
+
+
+echo "Configure MISP | Enforce permissions ..."
+echo "... chown -R www-data.www-data /var/www/MISP ..." && find /var/www/MISP -not -user www-data -exec chown www-data.www-data {} +
+echo "... chmod -R 0750 /var/www/MISP ..." && find /var/www/MISP -perm 550 -type f -exec chmod 0550 {} + && find /var/www/MISP -perm 770 -type d -exec chmod 0770 {} +
+echo "... chmod -R g+ws /var/www/MISP/app/tmp ..." && chmod -R g+ws /var/www/MISP/app/tmp
+echo "... chmod -R g+ws /var/www/MISP/app/files ..." && chmod -R g+ws /var/www/MISP/app/files
+echo "... chmod -R g+ws /var/www/MISP/app/files/scripts/tmp ..." && chmod -R g+ws /var/www/MISP/app/files/scripts/tmp
+
+
+        echo "[*] Fixing permissions..."
         chown -R www-data:www-data /var/www/MISP
         chmod -R 750 /var/www/MISP
         chmod -R g+ws /var/www/MISP/app/tmp
@@ -32,57 +45,59 @@ if [ -r /.firstboot.tmp ]; then
         chown -R www-data:www-data misp-objects misp-galaxy warninglists taxonomies
 
         # Fix repository permissions to allow update of submodules (objects, galaxy, taxonomies...)
+        echo "[*] Updating MISP local repository and submodule permissions..."
         cd /var/www/MISP
         sudo -u www-data git pull origin 2.4
         sudo -u www-data git submodule update -f
 
-        echo "Configuring PHP settings..."
+        echo "[*] Configuring PHP recommended settings..."
         # Fix php.ini with recommended settings
-        sed -i "s/max_execution_time = 30/max_execution_time = 300/" /etc/php/7.3/apache2/php.ini
-        sed -i "s/memory_limit = 128M/memory_limit = 2048M/" /etc/php/7.3/apache2/php.ini
-        sed -i "s/upload_max_filesize = 2M/upload_max_filesize = 50M/" /etc/php/7.3/apache2/php.ini
-        sed -i "s/post_max_size = 8M/post_max_size = 50M/" /etc/php/7.3/apache2/php.ini
+        for FILE in /etc/php/*/apache2/php.ini
+        do  
+                [[ -e $FILE ]] || break
+                sed -i "s/memory_limit = .*/memory_limit = 2048M/" "$FILE"
+                sed -i "s/max_execution_time = .*/max_execution_time = 300/" "$FILE"
+                sed -i "s/upload_max_filesize = .*/upload_max_filesize = 50M/" "$FILE"
+                sed -i "s/post_max_size = .*/post_max_size = 50M/" "$FILE"
+        done
 
-        echo "Configuring postfix"
+        echo "[*] Configuring postfix and timezone..."
         if [ -z "$POSTFIX_RELAY_HOST" ]; then
-                echo "POSTFIX_RELAY_HOST is not set, please configure Postfix manually later..."
+                echo "[-] WARNING: Variable POSTFIX_RELAY_HOST is not set, please configure Postfix manually later..."
         else
                 postconf -e "relayhost = $POSTFIX_RELAY"
         fi
-
-        # Fix timezone (adapt to your local zone)
         if [ -z "$TIMEZONE" ]; then
-                echo "TIMEZONE is not set, please configure the local time zone manually later..."
+                echo "[-] WARNING: TIMEZONE is not set, please configure the local time zone manually later..."
         else
                 echo "$TIMEZONE" > /etc/timezone
                 dpkg-reconfigure -f noninteractive tzdata >>/tmp/install.log
         fi
 
-        echo "Creating MySQL database"
-
+        echo "[*] Creating MySQL database..."
         # Check MYSQL_HOST
         if [ -z "$MYSQL_HOST" ]; then
-                echo "MYSQL_HOST is not set. Aborting."
+                echo "[-] ERROR: MYSQL_HOST is not set. Aborting."
                 exit 1
         fi
 		
 		# Waiting for DB to be ready
 		while ! mysqladmin ping -h"$MYSQL_HOST" --silent; do
 		    sleep 5
-			echo "Waiting for database to be ready..."
+			echo "[-] INFO: Waiting for database to be ready..."
 		done
 		
         # Set MYSQL_PASSWORD
         if [ -z "$MYSQL_PASSWORD" ]; then
-                echo "MYSQL_PASSWORD is not set, use default value 'misp'"
+                echo "[-] WARNING: MYSQL_PASSWORD is not set, use default value 'misp'"
                 MYSQL_PASSWORD=misp
         else
-                echo "MYSQL_PASSWORD is set to '$MYSQL_PASSWORD'"
+                echo "[-] INFO: MYSQL_PASSWORD is set to '$MYSQL_PASSWORD'"
         fi
 
         ret=`echo 'SHOW TABLES;' | mysql -u $MYSQL_USER --password="$MYSQL_PASSWORD" -h $MYSQL_HOST -P 3306 $MYSQL_DATABASE # 2>&1`
         if [ $? -eq 0 ]; then
-                echo "Connected to database successfully!"
+                echo "[-] INFO: Connected to database successfully!"
                 found=0
                 for table in $ret; do
                         if [ "$table" == "attributes" ]; then
@@ -90,25 +105,26 @@ if [ -r /.firstboot.tmp ]; then
                         fi
                 done
                 if [ $found -eq 1 ]; then
-                        echo "Database misp available"
+                        echo "[-] INFO: Database misp available"
                 else
-                        echo "Database misp empty, creating tables ..."
+                        echo "[-] Database misp empty, creating tables ..."
                         ret=`mysql -u $MYSQL_USER --password="$MYSQL_PASSWORD" $MYSQL_DATABASE -h $MYSQL_HOST -P 3306 2>&1 < /var/www/MISP/INSTALL/MYSQL.sql`
                         if [ $? -eq 0 ]; then
-                            echo "Imported /var/www/MISP/INSTALL/MYSQL.sql successfully"
+                            echo "[-] INFO: Imported /var/www/MISP/INSTALL/MYSQL.sql successfully"
                         else
-                            echo "ERROR: Importing /var/www/MISP/INSTALL/MYSQL.sql failed:"
+                            echo "[-] ERROR: Importing /var/www/MISP/INSTALL/MYSQL.sql failed:"
                             echo $ret
                         fi
                 fi
         else
-                echo "ERROR: Connecting to database failed:"
+                echo "[-] ERROR: Connecting to database failed:"
                 echo $ret
         fi
 
         # MISP configuration
-        echo "Creating MISP configuration files"
-        cd /var/www/MISP/app/Config
+        echo "[*] Adjusting MISP configuration files..."
+        MISP_APP_CONFIG_PATH=/var/www/MISP/app/Config
+        cd MISP_APP_CONFIG_PATH
         cp -a database.default.php database.php
         sed -i "s/localhost/$MYSQL_HOST/" database.php
         sed -i "s/db\s*login/$MYSQL_USER/" database.php
@@ -117,18 +133,28 @@ if [ -r /.firstboot.tmp ]; then
 
         # Fix the base url
         if [ -z "$MISP_BASEURL" ]; then
-                echo "No base URL defined, don't forget to define it manually!"
+                echo "[-] INFO: No base URL defined, don't forget to define it manually!"
         else
-                echo "Fixing the MISP base URL ($MISP_BASEURL) ..."
-                sed -i "s/'baseurl' => '',/'baseurl' => '$MISP_BASEURL',/" /var/www/MISP/app/Config/config.php
+                echo "[*] Fixing the MISP base URL ($MISP_BASEURL) ..."
+                sed -i "s/'baseurl' => '',/'baseurl' => '$MISP_BASEURL',/" MISP_APP_CONFIG_PATH/config.php
         fi
+        # Set Redis
+        echo "[-] INFO: Setting Redis FQDN..."
+        [ -z "$REDIS_FQDN" ] && REDIS_FQDN=misp_redis
+        sed -i "s/'host' => 'localhost'.*/'host' => '$REDIS_FQDN',          \/\/ Redis server hostname/" "/var/www/MISP/app/Plugin/CakeResque/Config/config.php"
+
+        # TODO
+        #echo "Configure sane defaults"
+        #/var/www/MISP/app/Console/cake Admin setSetting "MISP.redis_host" "$REDIS_FQDN"
+        #/var/www/MISP/app/Console/cake Admin setSetting "MISP.baseurl" "$HOSTNAME"
+        #/var/www/MISP/app/Console/cake Admin setSetting "MISP.python_bin" $(which python3)
 
         # Generate the admin user PGP key
-        echo "Creating admin GnuPG key"
+        echo "[*] Creating admin GnuPG key..."
         if [ -z "$MISP_ADMIN_EMAIL" -o -z "$MISP_ADMIN_PASSPHRASE" ]; then
-                echo "No admin details provided, don't forget to generate the PGP key manually!"
+                echo "[-] No admin details provided, don't forget to generate the PGP key manually!"
         else
-                echo "Generating admin PGP key ... (please be patient, we need some entropy)"
+                echo "[-] Generating admin PGP key... (please be patient, we need some entropy)"
                 cat >/tmp/gpg.tmp <<GPGEOF
 %echo Generating a basic OpenPGP key
 Key-Type: RSA
@@ -147,9 +173,10 @@ GPGEOF
 
         # Display tips
         cat <<__WELCOME__
+
 Congratulations!
 Your MISP docker has been successfully booted for the first time.
-Don't forget:
+Don't forget to:
 - Reconfigure postfix to match your environment
 - Change the MISP admin email address to $MISP_ADMIN_EMAIL
 
@@ -158,7 +185,6 @@ __WELCOME__
 fi
 
 # Start supervisord
-echo "Starting supervisord"
+echo "[*] Starting supervisord..."
 cd /
 exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
-          
