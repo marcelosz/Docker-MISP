@@ -124,7 +124,7 @@ echo "... chmod -R g+ws /var/www/MISP/app/files/scripts/tmp ..." && chmod -R g+w
         # MISP configuration
         echo "[*] Adjusting MISP configuration files..."
         MISP_APP_CONFIG_PATH=/var/www/MISP/app/Config
-        cd MISP_APP_CONFIG_PATH
+        cd $MISP_APP_CONFIG_PATH
         cp -a database.default.php database.php
         sed -i "s/localhost/$MYSQL_HOST/" database.php
         sed -i "s/db\s*login/$MYSQL_USER/" database.php
@@ -136,7 +136,7 @@ echo "... chmod -R g+ws /var/www/MISP/app/files/scripts/tmp ..." && chmod -R g+w
                 echo "[-] INFO: No base URL defined, don't forget to define it manually!"
         else
                 echo "[*] Fixing the MISP base URL ($MISP_BASEURL) ..."
-                sed -i "s/'baseurl' => '',/'baseurl' => '$MISP_BASEURL',/" MISP_APP_CONFIG_PATH/config.php
+                sed -i "s/'baseurl' => '',/'baseurl' => '$MISP_BASEURL',/" $MISP_APP_CONFIG_PATH/config.php
         fi
         # Set Redis
         echo "[-] INFO: Setting Redis FQDN..."
