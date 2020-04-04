@@ -22,23 +22,21 @@ if [ -r /.firstboot.tmp ]; then
         fi
 
         # Fix permissions
-
-
         echo "[*] Fixing permissions..."
         echo "[-] INFO: chown -R www-data.www-data /var/www/MISP ..." && find /var/www/MISP -not -user www-data -exec chown www-data.www-data {} +
         echo "[-] INFO: chmod -R 0750 /var/www/MISP ..." && find /var/www/MISP -perm 550 -type f -exec chmod 0550 {} + && find /var/www/MISP -perm 770 -type d -exec chmod 0770 {} +
         echo "[-] INFO: chmod -R g+ws /var/www/MISP/app/tmp ..." && chmod -R g+ws /var/www/MISP/app/tmp
         echo "[-] INFO: chmod -R g+ws /var/www/MISP/app/files ..." && chmod -R g+ws /var/www/MISP/app/files
         echo "[-] INFO: chmod -R g+ws /var/www/MISP/app/files/scripts/tmp ..." && chmod -R g+ws /var/www/MISP/app/files/scripts/tmp
+        
         echo "[-] INFO: chmod +x /var/www/MISP/app/Console/cake ..." && chmod +x /var/www/MISP/app/Console/cake
-        echo "[-] INFO: && chown -R www-data:www-data /var/www/MISP/app/Config && chmod -R 750 /var/www/MISP/app/Config ..." && chown -R www-data:www-data /var/www/MISP/app/Config && chmod -R 750 /var/www/MISP/app/Config
-        echo "[-] INFO: cd /var/www/MISP/app/files && chown -R www-data:www-data misp-objects misp-galaxy warninglists taxonomies ..." &&  cd /var/www/MISP/app/files && chown -R www-data:www-data misp-objects misp-galaxy warninglists taxonomies
-
+        #echo "[-] INFO: chown -R www-data:www-data /var/www/MISP/app/Config && chmod -R 750 /var/www/MISP/app/Config ..." && chown -R www-data:www-data /var/www/MISP/app/Config && chmod -R 750 /var/www/MISP/app/Config
+        #echo "[-] INFO: cd /var/www/MISP/app/files && chown -R www-data:www-data misp-objects misp-galaxy warninglists taxonomies ..." &&  cd /var/www/MISP/app/files && chown -R www-data:www-data misp-objects misp-galaxy warninglists taxonomies
         # Fix repository permissions to allow update of submodules (objects, galaxy, taxonomies...)
-        #echo "[*] Updating MISP local repository and submodule permissions..."
-        #cd /var/www/MISP
-        #sudo -u www-data git pull origin 2.4
-        #sudo -u www-data git submodule update -f
+        echo "[*] Updating MISP local repository and submodule permissions..."
+        cd /var/www/MISP
+        sudo -u www-data git pull origin 2.4
+        sudo -u www-data git submodule update -f
 
         echo "[*] Configuring PHP recommended settings..."
         # Fix php.ini with recommended settings
@@ -112,7 +110,8 @@ if [ -r /.firstboot.tmp ]; then
         fi
 
         # MISP configuration
-        echo "[*] Adjusting MISP configuration files..."
+        echo "[*] Adjusting MISP configuration..."
+        echo "[-] INFO: Setting base config..."        
         MISP_APP_CONFIG_PATH=/var/www/MISP/app/Config
         cd $MISP_APP_CONFIG_PATH
         cp -a database.default.php database.php
@@ -121,23 +120,21 @@ if [ -r /.firstboot.tmp ]; then
         sed -i "s/8889/3306/" database.php
         sed -i "s/db\s*password/$MYSQL_PASSWORD/" database.php
 
-        # Fix the base url
         if [ -z "$MISP_BASEURL" ]; then
                 echo "[-] INFO: No base URL defined, don't forget to define it manually!"
         else
-                echo "[*] Fixing the MISP base URL ($MISP_BASEURL) ..."
+                echo "[-] Fixing the MISP base URL ($MISP_BASEURL)..."
                 sed -i "s/'baseurl' => '',/'baseurl' => '$MISP_BASEURL',/" $MISP_APP_CONFIG_PATH/config.php
+                #/var/www/MISP/app/Console/cake Admin setSetting "MISP.baseurl" "$HOSTNAME"                
         fi
-        # Set Redis
+
         echo "[-] INFO: Setting Redis FQDN..."
         [ -z "$REDIS_FQDN" ] && REDIS_FQDN=misp_redis
         sed -i "s/'host' => 'localhost'.*/'host' => '$REDIS_FQDN',          \/\/ Redis server hostname/" "/var/www/MISP/app/Plugin/CakeResque/Config/config.php"
+        /var/www/MISP/app/Console/cake Admin setSetting "MISP.redis_host" "$REDIS_FQDN"
 
-        # TODO
-        #echo "Configure sane defaults"
-        #/var/www/MISP/app/Console/cake Admin setSetting "MISP.redis_host" "$REDIS_FQDN"
-        #/var/www/MISP/app/Console/cake Admin setSetting "MISP.baseurl" "$HOSTNAME"
-        #/var/www/MISP/app/Console/cake Admin setSetting "MISP.python_bin" $(which python3)
+        echo "[-] INFO: Adjusting other MISP settings..."        
+        /var/www/MISP/app/Console/cake Admin setSetting "MISP.python_bin" $(which python3)
 
         # Generate the admin user PGP key
         echo "[*] Creating admin GnuPG key..."
