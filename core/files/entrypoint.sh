@@ -24,31 +24,21 @@ if [ -r /.firstboot.tmp ]; then
         # Fix permissions
 
 
-echo "Configure MISP | Enforce permissions ..."
-echo "... chown -R www-data.www-data /var/www/MISP ..." && find /var/www/MISP -not -user www-data -exec chown www-data.www-data {} +
-echo "... chmod -R 0750 /var/www/MISP ..." && find /var/www/MISP -perm 550 -type f -exec chmod 0550 {} + && find /var/www/MISP -perm 770 -type d -exec chmod 0770 {} +
-echo "... chmod -R g+ws /var/www/MISP/app/tmp ..." && chmod -R g+ws /var/www/MISP/app/tmp
-echo "... chmod -R g+ws /var/www/MISP/app/files ..." && chmod -R g+ws /var/www/MISP/app/files
-echo "... chmod -R g+ws /var/www/MISP/app/files/scripts/tmp ..." && chmod -R g+ws /var/www/MISP/app/files/scripts/tmp
-
-
         echo "[*] Fixing permissions..."
-        chown -R www-data:www-data /var/www/MISP
-        chmod -R 750 /var/www/MISP
-        chmod -R g+ws /var/www/MISP/app/tmp
-        chmod -R g+ws /var/www/MISP/app/files
-        chmod -R g+ws /var/www/MISP/app/files/scripts/tmp
-        chmod +x /var/www/MISP/app/Console/cake
-        chown -R www-data:www-data /var/www/MISP/app/Config
-        chmod -R 750 /var/www/MISP/app/Config
-        cd /var/www/MISP/app/files        
-        chown -R www-data:www-data misp-objects misp-galaxy warninglists taxonomies
+        echo "[-] INFO: chown -R www-data.www-data /var/www/MISP ..." && find /var/www/MISP -not -user www-data -exec chown www-data.www-data {} +
+        echo "[-] INFO: chmod -R 0750 /var/www/MISP ..." && find /var/www/MISP -perm 550 -type f -exec chmod 0550 {} + && find /var/www/MISP -perm 770 -type d -exec chmod 0770 {} +
+        echo "[-] INFO: chmod -R g+ws /var/www/MISP/app/tmp ..." && chmod -R g+ws /var/www/MISP/app/tmp
+        echo "[-] INFO: chmod -R g+ws /var/www/MISP/app/files ..." && chmod -R g+ws /var/www/MISP/app/files
+        echo "[-] INFO: chmod -R g+ws /var/www/MISP/app/files/scripts/tmp ..." && chmod -R g+ws /var/www/MISP/app/files/scripts/tmp
+        echo "[-] INFO: chmod +x /var/www/MISP/app/Console/cake ..." && chmod +x /var/www/MISP/app/Console/cake
+        echo "[-] INFO: && chown -R www-data:www-data /var/www/MISP/app/Config && chmod -R 750 /var/www/MISP/app/Config ..." && chown -R www-data:www-data /var/www/MISP/app/Config && chmod -R 750 /var/www/MISP/app/Config
+        echo "[-] INFO: cd /var/www/MISP/app/files && chown -R www-data:www-data misp-objects misp-galaxy warninglists taxonomies ..." &&  cd /var/www/MISP/app/files && chown -R www-data:www-data misp-objects misp-galaxy warninglists taxonomies
 
         # Fix repository permissions to allow update of submodules (objects, galaxy, taxonomies...)
-        echo "[*] Updating MISP local repository and submodule permissions..."
-        cd /var/www/MISP
-        sudo -u www-data git pull origin 2.4
-        sudo -u www-data git submodule update -f
+        #echo "[*] Updating MISP local repository and submodule permissions..."
+        #cd /var/www/MISP
+        #sudo -u www-data git pull origin 2.4
+        #sudo -u www-data git submodule update -f
 
         echo "[*] Configuring PHP recommended settings..."
         # Fix php.ini with recommended settings
