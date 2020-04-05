@@ -50,7 +50,7 @@ if [ -r /.firstboot.tmp ]; then
         if [ -z "$POSTFIX_RELAY_HOST" ]; then
                 echo "[-] WARNING: Variable POSTFIX_RELAY_HOST is not set, please configure Postfix manually later..."
         else
-                postconf -e "relayhost = $POSTFIX_RELAY"
+                postconf -e "relayhost = $POSTFIX_RELAY_HOST"
         fi
         if [ -z "$TIMEZONE" ]; then
                 echo "[-] WARNING: TIMEZONE is not set, please configure the local time zone manually later..."
@@ -122,7 +122,7 @@ if [ -r /.firstboot.tmp ]; then
         else
                 echo "[-] Fixing the MISP base URL ($MISP_BASEURL)..."
                 sed -i "s/'baseurl' => '',/'baseurl' => '$MISP_BASEURL',/" $MISP_APP_CONFIG_PATH/config.php
-                #/var/www/MISP/app/Console/cake Admin setSetting "MISP.baseurl" "$HOSTNAME"                
+                /var/www/MISP/app/Console/cake Admin setSetting "MISP.baseurl" "$HOSTNAME"             
         fi
 
         echo "[-] INFO: Setting Redis FQDN..."
@@ -130,8 +130,7 @@ if [ -r /.firstboot.tmp ]; then
         sed -i "s/'host' => 'localhost'.*/'host' => '$REDIS_FQDN',          \/\/ Redis server hostname/" "/var/www/MISP/app/Plugin/CakeResque/Config/config.php"
         /var/www/MISP/app/Console/cake Admin setSetting "MISP.redis_host" "$REDIS_FQDN"
 
-        echo "[-] INFO: PyMISP workarounds..."  
-
+        echo "[-] INFO: PyMISP workarounds..."
         # Work around to resolve PyMISP version conflict
         cd /var/www/MISP/PyMISP
         python3 setup.py install
@@ -154,6 +153,9 @@ if [ -r /.firstboot.tmp ]; then
         /var/www/MISP/app/Console/cake Admin setSetting "Plugin.Export_services_url" "http://localhost"
 
         /var/www/MISP/app/Console/cake Admin setSetting "Plugin.Cortex_services_enable" false
+
+        /var/www/MISP/app/Console/cake Admin setSetting "GnuPG.email" "MISP_ADMIN_EMAIL"
+        /var/www/MISP/app/Console/cake Admin setSetting "GnuPG.homedir" "/var/www/MISP"        
 
         # Generate the admin user PGP key
         echo "[*] Creating admin GnuPG key..."
@@ -183,8 +185,10 @@ GPGEOF
 Congratulations!
 Your MISP docker has been successfully booted for the first time.
 Don't forget to:
-- Reconfigure postfix to match your environment
-- Change the MISP admin email address to $MISP_ADMIN_EMAIL
+1) Check relay host $POSTFIX_RELAY_HOST SMTP settings
+2) Change the MISP admin email address to $MISP_ADMIN_EMAIL
+3) Adjust Cron settings (/etc/crontab of the core MISP container) to fetch feeds as needed
+4) Do the fine tunning of your new MISP instance (organization name, users, sync user & servers, plugins, proxy, ...)
 
 __WELCOME__
         rm -f /.firstboot.tmp
