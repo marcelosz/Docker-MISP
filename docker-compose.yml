@@ -47,7 +47,6 @@ services:
     volumes:
       - /dev/urandom:/dev/random
       - ${DATA_DIR}/core/web:/var/www/MISP
-      - ${DATA_DIR}/core/logs:/var/log      
     ports:
       - 80:80
     environment:

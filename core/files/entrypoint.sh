@@ -161,7 +161,7 @@ if [ -r /.firstboot.tmp ]; then
 
         # Create MISP cron tab
         echo "[-] INFO: Creating Cron entries for MISP in /etc/cron.d/misp..."
-        $CRON_USER_ID=1 # 1 = Admin
+        CRON_USER_ID=1
         cat << EOF > /etc/cron.d/misp
 # Admin tasks - update components
 00 3 * * * www-data /var/www/MISP/app/Console/cake Admin updateGalaxies >>/var/log/misp-cron.log 2>>/var/log/misp-cron.log
