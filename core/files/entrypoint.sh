@@ -130,7 +130,22 @@ if [ -r /.firstboot.tmp ]; then
         sed -i "s/'host' => 'localhost'.*/'host' => '$REDIS_FQDN',          \/\/ Redis server hostname/" "/var/www/MISP/app/Plugin/CakeResque/Config/config.php"
         /var/www/MISP/app/Console/cake Admin setSetting "MISP.redis_host" "$REDIS_FQDN"
 
-        echo "[-] INFO: Adjusting other MISP settings..."        
+        echo "[-] INFO: PyMISP workarounds..."  
+
+        # Workaround to resolve PyMISP version conflict
+        pip3 uninstall stix
+        pip3 uninstall cybox 
+        pip3 uninstall mixbox
+        cd /var/www/MISP/PyMISP
+        python3 setup.py install
+
+        # Work around https://github.com/MISP/MISP/issues/5608
+        if [[ ! -f /var/www/MISP/PyMISP/pymisp/data/describeTypes.json ]]; then
+                mkdir -p /var/www/MISP/PyMISP/pymisp/data/
+                ln -s /usr/local/lib/python3.7/dist-packages/pymisp/data/describeTypes.json /var/www/MISP/PyMISP/pymisp/data/describeTypes.json
+        fi
+
+        echo "[-] INFO: Adjusting other MISP settings..."  
         /var/www/MISP/app/Console/cake Admin setSetting "MISP.python_bin" $(which python3)
 
         /var/www/MISP/app/Console/cake Admin setSetting "Plugin.Enrichment_services_enable" true
@@ -143,12 +158,6 @@ if [ -r /.firstboot.tmp ]; then
         /var/www/MISP/app/Console/cake Admin setSetting "Plugin.Export_services_url" "http://localhost"
 
         /var/www/MISP/app/Console/cake Admin setSetting "Plugin.Cortex_services_enable" false
-
-        # Work around https://github.com/MISP/MISP/issues/5608
-        if [[ ! -f /var/www/MISP/PyMISP/pymisp/data/describeTypes.json ]]; then
-                mkdir -p /var/www/MISP/PyMISP/pymisp/data/
-                ln -s /usr/local/lib/python3.7/dist-packages/pymisp/data/describeTypes.json /var/www/MISP/PyMISP/pymisp/data/describeTypes.json
-        fi
 
         # Generate the admin user PGP key
         echo "[*] Creating admin GnuPG key..."
