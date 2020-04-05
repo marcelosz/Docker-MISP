@@ -15,22 +15,28 @@ The main Dockerfile is already integrated to Docker Hub, so you can download ima
 
 # Using Docker-MISP
 ### Deploying a new MISP instance
+Clone the repository and get into its folder
 ```
-# Clone the repository and get into its folder
 $ git clone https://github.com/marcelosz/Docker-MISP.git
 $ cd Docker-MISP
-# Copy template.env to .env and edit the environment variables as needed
+```
+Copy template.env to .env and edit the environment variables as needed
+```
 $ cp template.env .env
 $ vi .env
-# Deploy the Docker stack using docker-compose
+```
+Deploy the Docker stack using docker-compose
+```
 $ docker-compose up
 ```
 
 ### Building the core MISP Docker image
-```
 # Clone the repository and get into its folder
+```
 $ git clone https://github.com/marcelosz/Docker-MISP.git
 $ cd Docker-MISP
-# Build the core Docker image
+```
+Build the core Docker image
+```
 $ docker-compose -f docker-compose-build.yml build
 ```
