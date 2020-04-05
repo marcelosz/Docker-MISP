@@ -42,7 +42,7 @@ $ docker-compose -f docker-compose-build.yml build
 ```
 
 # TODO
-Please check repository Issues for the current TODO list.
+Please check repository [Issues](https://github.com/marcelosz/Docker-MISP/issues) for the current TODO list.
 
 
 # Acknowledgements
