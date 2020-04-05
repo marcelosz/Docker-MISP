@@ -42,4 +42,4 @@ $ docker-compose -f docker-compose-build.yml build
 ```
 
 # Acknowledgements
-Docker-MISP is based on previous work by Xavier Mertens (@xme) and Jason Kendall (@collacid)
+Docker-MISP is based on previous work by Xavier Mertens (@xme) and Jason Kendall (@collacid).
