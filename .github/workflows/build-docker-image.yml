@@ -15,4 +15,4 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build the Docker image
-      run: docker-compose -f docker-compose-build.yml build
+      run: cp template.env .env ; docker-compose -f docker-compose-build.yml build
