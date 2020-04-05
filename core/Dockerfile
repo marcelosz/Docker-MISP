@@ -82,6 +82,7 @@ ENV DEBIAN_FRONTEND noninteractive
 ARG MODULES_TAG
 
     RUN apt-get update && apt-get install -y --no-install-recommends \
+        virtualenv \
         cmake \
         git \
         python3-dev \
@@ -91,16 +92,18 @@ ARG MODULES_TAG
         pkg-config \
         libpoppler-cpp-dev \
         libfuzzy-dev \
+        libpq5 libjpeg-dev tesseract-ocr imagemagick libopencv-dev zbar-tools libzbar0 libzbar-dev \
         && apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
     RUN mkdir /wheel
-    WORKDIR /srv
-    RUN git clone --branch ${MODULES_TAG} --depth 1  https://github.com/MISP/misp-modules.git /srv/misp-modules; \
-        cd /srv/misp-modules || exit; sed -i 's/-e //g' REQUIREMENTS; pip3 wheel -r REQUIREMENTS --no-cache-dir -w /wheel/
+    WORKDIR /tmp
 
-    RUN git clone --depth 1 https://github.com/stricaud/faup.git /srv/faup; \
-        cd /srv/faup/build || exit; cmake .. && make install; \
-        cd /srv/faup/src/lib/bindings/python || exit; pip3 wheel --no-cache-dir -w /wheel/ .
+    RUN git clone --branch ${MODULES_TAG} --depth 1  https://github.com/MISP/misp-modules.git /tmp/misp-modules;
+
+    WORKDIR /tmp/misp-modules
+    RUN virtualenv -p python3 /tmp/misp-modules/venv
+    RUN /tmp/misp-modules/venv/bin/pip install -I -r REQUIREMENTS
+    RUN /tmp/misp-modules/venv/bin/pip install .
 
 ############################################################################################################################
 
@@ -181,9 +184,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
             libxext6 \
             libpoppler-cpp0v5 \
             && apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/*
-COPY --from=modules-build /wheel /wheel
-COPY --from=modules-build /usr/local/lib/libfaupl* /usr/local/lib/
-RUN pip3 install /wheel/*.whl; ldconfig
+
+WORKDIR /opt/misp-modules
+#COPY --from=modules-build /wheel /wheel
+#COPY --from=modules-build /usr/local/lib/libfaupl* /usr/local/lib/
+COPY --from=modules-build /tmp/misp-modules /opt/misp-modules
+#RUN pip3 install /wheel/*.whl; ldconfig
 
 #
 # Download, install and configure MISP itself
