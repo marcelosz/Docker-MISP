@@ -74,37 +74,6 @@ FROM debian:buster-slim as python-build
     RUN git clone --depth 1 https://github.com/coolacid/pydeep.git; \
         cd pydeep || exit; python3 setup.py bdist_wheel -d /wheels
 
-#
-# MISP modules build
-#
-FROM python:3.7-slim-buster as modules-build
-ENV DEBIAN_FRONTEND noninteractive
-ARG MODULES_TAG
-
-    RUN apt-get update && apt-get install -y --no-install-recommends \
-        virtualenv \
-        cmake \
-        git \
-        python3-dev \
-        python3-pip \
-        python3-wheel \
-        build-essential \
-        pkg-config \
-        libpoppler-cpp-dev \
-        libfuzzy-dev \
-        libpq5 libjpeg-dev tesseract-ocr imagemagick libopencv-dev zbar-tools libzbar0 libzbar-dev \
-        && apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/*
-
-    RUN mkdir /wheel
-    WORKDIR /tmp
-
-    RUN git clone --branch ${MODULES_TAG} --depth 1  https://github.com/MISP/misp-modules.git /tmp/misp-modules;
-
-    WORKDIR /tmp/misp-modules
-    RUN virtualenv -p python3 /tmp/misp-modules/venv
-    RUN /tmp/misp-modules/venv/bin/pip install -I -r REQUIREMENTS
-    RUN /tmp/misp-modules/venv/bin/pip install .
-
 ############################################################################################################################
 
 #
@@ -114,7 +83,7 @@ FROM debian:buster-slim
 ENV DEBIAN_FRONTEND noninteractive
 ENV LANG en_US.UTF-8
 ARG MISP_TAG
-ARG MISP_MODULES
+ARG MODULES_TAG
 ARG PHP_VER
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -175,21 +144,26 @@ COPY --from=python-build /wheels /wheels
 RUN pip3 install --no-cache-dir /wheels/*.whl plyara pyzmq redis python-magic lief && rm -rf /wheels
 
 #
-# Install MISP Modules
+# Build and Install MISP Modules
+# TODO - separate this in future versions
 #
 RUN apt-get update && apt-get install -y --no-install-recommends \
-            libglib2.0-0 \
-            libzbar0 \
-            libxrender1 \
-            libxext6 \
-            libpoppler-cpp0v5 \
-            && apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/*
+    virtualenv \
+    cmake \
+    git \
+    python3-dev \
+    build-essential \
+    pkg-config \
+    libpoppler-cpp-dev \
+    libfuzzy-dev \
+    libpq5 libjpeg-dev tesseract-ocr imagemagick libopencv-dev zbar-tools libzbar0 libzbar-dev \
+    && apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/*
+
+RUN git clone --branch ${MODULES_TAG} --depth 1  https://github.com/MISP/misp-modules.git /opt/misp-modules;
 
 WORKDIR /opt/misp-modules
-#COPY --from=modules-build /wheel /wheel
-#COPY --from=modules-build /usr/local/lib/libfaupl* /usr/local/lib/
-COPY --from=modules-build /tmp/misp-modules /opt/misp-modules
-#RUN pip3 install /wheel/*.whl; ldconfig
+RUN pip3 install -I -r REQUIREMENTS
+RUN pip3 install .
 
 #
 # Download, install and configure MISP itself

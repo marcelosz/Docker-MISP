@@ -182,10 +182,6 @@ __WELCOME__
         rm -f /.firstboot.tmp
 fi
 
-# Start misp-modules
-#ENTRYPOINT [ "/usr/local/bin/misp-modules", "-l", "0.0.0.0"]
-#sudo -u www-data /usrmisp-modules -s -l 127.0.0.1 &" >>/etc/rc.local
-
 # Start supervisord
 echo "[*] Starting supervisord..."
 cd /
