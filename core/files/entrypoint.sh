@@ -111,6 +111,9 @@ if [ -r /.firstboot.tmp ]; then
         echo "[-] INFO: Setting base config..."        
         MISP_APP_CONFIG_PATH=/var/www/MISP/app/Config
         cd $MISP_APP_CONFIG_PATH
+        # Adjust permissions on this file
+        touch config.php.bk
+        chown www-data.www-data config.php.bk
         cp -a database.default.php database.php
         sed -i "s/localhost/$MYSQL_HOST/" database.php
         sed -i "s/db\s*login/$MYSQL_USER/" database.php
@@ -162,7 +165,7 @@ if [ -r /.firstboot.tmp ]; then
         # Create MISP cron tab
         echo "[-] INFO: Creating Cron entries for MISP in /etc/cron.d/misp..."
         CRON_USER_ID=1
-        cat << EOF > /etc/cron.d/misp
+        cat << EOF > /var/www/MISP/misp.cron
 # Admin tasks - update components
 00 3 * * * www-data /var/www/MISP/app/Console/cake Admin updateGalaxies >>/var/log/misp-cron.log 2>>/var/log/misp-cron.log
 10 3 * * * www-data /var/www/MISP/app/Console/cake Admin updateTaxonomies >>/var/log/misp-cron.log 2>>/var/log/misp-cron.log
@@ -186,8 +189,7 @@ if [ -r /.firstboot.tmp ]; then
 #00 0 * * * www-data /var/www/MISP/app/Console/cake Server pull "$CRON_USER_ID" "$SYNCSERVER" >>/var/log/misp-cron.log 2>>/var/log/misp-cron.log
 #05 1 * * * www-data /var/www/MISP/app/Console/cake Server push "$CRON_USER_ID" "$SYNCSERVER" >>/var/log/misp-cron.log 2>>/var/log/misp-cron.log
 EOF
-        service cron start
-
+        ln -sf /var/www/MISP/misp.cron /etc/cron.d/misp
         # Generate the admin user PGP key
         echo "[*] Creating admin GnuPG key..."
         if [ -z "$MISP_ADMIN_EMAIL" -o -z "$MISP_ADMIN_PASSPHRASE" ]; then
@@ -216,14 +218,20 @@ GPGEOF
 Congratulations!
 Your MISP docker has been successfully booted for the first time.
 Don't forget to:
-1) Check relay host $POSTFIX_RELAY_HOST SMTP settings
-2) Change the MISP admin email address to $MISP_ADMIN_EMAIL
-3) Check cron settings (/etc/cron.d/misp) for the admin tasks and feed fetching as needed
-4) Do the fine tunning of your new MISP instance (organization name, users, sync user & servers, plugins, proxy, ...)
+1) Adjust Base URL setting
+2) Check relay host $POSTFIX_RELAY_HOST SMTP settings
+3) Change the MISP admin email address to $MISP_ADMIN_EMAIL
+4) Check cron settings (/etc/cron.d/misp) for the admin tasks and feeds fetching as needed
+5) Do the fine tunning of your new MISP instance (organization name, users, sync user & servers, plugins, proxy, ...)
 
 __WELCOME__
         rm -f /.firstboot.tmp
 fi
+
+# Start syslog-ng, cron and postfix
+service syslog-ng start
+service cron start
+service postfix start
 
 # Start supervisord
 echo "[*] Starting supervisord..."
