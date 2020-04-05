@@ -5,7 +5,18 @@ services:
     # This is a SMTP docker container for sending emails. Can also relay emails to GMail and Amazon SES.
     # See: https://hub.docker.com/r/namshi/smtp
     container_name: misp_mail
-    image: namshi/smtp  
+    image: namshi/smtp
+    environment:
+      # Amazon SES or SMTP Smarthost settings. Set them through .env file on the same dir.
+      - SES_USER=${MAIL_SES_USER}
+      - SES_PASSWORD=${MAIL_SES_PASSWORD}
+      - SES_REGION=${MAIL_SES_REGION}
+      - SES_PORT=${MAIL_SES_PORT}
+      - SMARTHOST_ADDRESS=${MAIL_SMARTHOST_ADDRESS}
+      - SMARTHOST_PORT=${MAIL_SMARTHOST_PORT}
+      - SMARTHOST_USER=${MAIL_SMARTHOST_USER}
+      - SMARTHOST_PASSWORD=${MAIL_SMARTHOST_PASSWORD}
+      - SMARTHOST_ALIASES=${MAIL_SMARTHOST_ALIASES}
 
   redis:
     container_name: misp_redis    
@@ -21,6 +32,7 @@ services:
     volumes:
       - ${DATA_DIR}/db:/var/lib/mysql
     environment:
+      # MySQL database name, users and passwords. Set them through .env file on the same dir.
       - MYSQL_DATABASE=${MYSQL_DATABASE}
       - MYSQL_USER=${MYSQL_USER}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
@@ -50,6 +62,7 @@ services:
     ports:
       - 80:80
     environment:
+      # MySQL host name, MISP db user passwords, and other settings. Set them through .env file on the same dir.
       - MYSQL_HOST=${MYSQL_HOST}
       - MYSQL_DATABASE=${MYSQL_DATABASE}
       - MYSQL_MISP_USER=${MYSQL_USER}
