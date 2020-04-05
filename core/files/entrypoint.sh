@@ -133,19 +133,16 @@ if [ -r /.firstboot.tmp ]; then
         echo "[-] INFO: Adjusting other MISP settings..."        
         /var/www/MISP/app/Console/cake Admin setSetting "MISP.python_bin" $(which python3)
 
-# TODO
-        #echo "/var/www/MISP/app/Console/cake Password 'admin@admin.test' '@dmin1!'" >> /root/init-db ; \
+        /var/www/MISP/app/Console/cake Admin setSetting "Plugin.Enrichment_services_enable" true
+        /var/www/MISP/app/Console/cake Admin setSetting "Plugin.Enrichment_services_url" "http://localhost"
 
-#     /var/www/MISP/app/Console/cake Admin setSetting "Plugin.Enrichment_services_enable" true
-#     /var/www/MISP/app/Console/cake Admin setSetting "Plugin.Enrichment_services_url" "http://misp-modules"
+        /var/www/MISP/app/Console/cake Admin setSetting "Plugin.Import_services_enable" true
+        /var/www/MISP/app/Console/cake Admin setSetting "Plugin.Import_services_url" "http://localhost"
 
-#     /var/www/MISP/app/Console/cake Admin setSetting "Plugin.Import_services_enable" true
-#     /var/www/MISP/app/Console/cake Admin setSetting "Plugin.Import_services_url" "http://misp-modules"
+        /var/www/MISP/app/Console/cake Admin setSetting "Plugin.Export_services_enable" true
+        /var/www/MISP/app/Console/cake Admin setSetting "Plugin.Export_services_url" "http://localhost"
 
-#     /var/www/MISP/app/Console/cake Admin setSetting "Plugin.Export_services_enable" true
-#     /var/www/MISP/app/Console/cake Admin setSetting "Plugin.Export_services_url" "http://misp-modules"
-
-#     /var/www/MISP/app/Console/cake Admin setSetting "Plugin.Cortex_services_enable" false
+        /var/www/MISP/app/Console/cake Admin setSetting "Plugin.Cortex_services_enable" false
 
         # Generate the admin user PGP key
         echo "[*] Creating admin GnuPG key..."
