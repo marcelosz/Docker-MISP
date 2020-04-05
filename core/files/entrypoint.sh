@@ -140,10 +140,12 @@ if [ -r /.firstboot.tmp ]; then
                 ln -s /usr/local/lib/python3.7/dist-packages/pymisp/data/describeTypes.json /var/www/MISP/PyMISP/pymisp/data/describeTypes.json
         fi
 
-        echo "[-] INFO: Adjusting other MISP settings..."  
+        echo "[-] INFO: Adjusting other MISP settings..."
+        
         /var/www/MISP/app/Console/cake Admin setSetting "MISP.python_bin" $(which python3)
 
         /var/www/MISP/app/Console/cake Admin setSetting "Plugin.Enrichment_services_enable" true
+        /var/www/MISP/app/Console/cake Admin setSetting "Plugin.Enrichment_hover_enable" true        
         /var/www/MISP/app/Console/cake Admin setSetting "Plugin.Enrichment_services_url" "http://misp_modules"
 
         /var/www/MISP/app/Console/cake Admin setSetting "Plugin.Import_services_enable" true
@@ -154,8 +156,11 @@ if [ -r /.firstboot.tmp ]; then
 
         /var/www/MISP/app/Console/cake Admin setSetting "Plugin.Cortex_services_enable" false
 
-        /var/www/MISP/app/Console/cake Admin setSetting "GnuPG.email" "MISP_ADMIN_EMAIL"
-        /var/www/MISP/app/Console/cake Admin setSetting "GnuPG.homedir" "/var/www/MISP"        
+        /var/www/MISP/app/Console/cake Admin setSetting "GnuPG.email" "$MISP_ADMIN_EMAIL"
+        /var/www/MISP/app/Console/cake Admin setSetting "GnuPG.homedir" "/var/www/MISP"
+
+        # Link MISP logs into /var/log/misp
+        ln -sf /var/www/MISP/app/tmp/logs /var/log/misp
 
         # Generate the admin user PGP key
         echo "[*] Creating admin GnuPG key..."
