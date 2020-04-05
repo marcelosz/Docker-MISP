@@ -130,18 +130,15 @@ if [ -r /.firstboot.tmp ]; then
         sed -i "s/'host' => 'localhost'.*/'host' => '$REDIS_FQDN',          \/\/ Redis server hostname/" "/var/www/MISP/app/Plugin/CakeResque/Config/config.php"
         /var/www/MISP/app/Console/cake Admin setSetting "MISP.redis_host" "$REDIS_FQDN"
 
-        echo "[-] INFO: PyMISP workarounds..."
-        # Work around to resolve PyMISP version conflict
-        #cd /var/www/MISP/PyMISP
-        #python3 setup.py install
+        echo "[-] INFO: PyMISP workaround..."
         # Work around https://github.com/MISP/MISP/issues/5608
         if [[ ! -f /var/www/MISP/PyMISP/pymisp/data/describeTypes.json ]]; then
                 mkdir -p /var/www/MISP/PyMISP/pymisp/data/
                 ln -s /usr/local/lib/python3.7/dist-packages/pymisp/data/describeTypes.json /var/www/MISP/PyMISP/pymisp/data/describeTypes.json
         fi
 
+        # Other settings
         echo "[-] INFO: Adjusting other MISP settings..."
-        
         /var/www/MISP/app/Console/cake Admin setSetting "MISP.python_bin" $(which python3)
 
         /var/www/MISP/app/Console/cake Admin setSetting "Plugin.Enrichment_services_enable" true
@@ -159,8 +156,35 @@ if [ -r /.firstboot.tmp ]; then
         /var/www/MISP/app/Console/cake Admin setSetting "GnuPG.email" "$MISP_ADMIN_EMAIL"
         /var/www/MISP/app/Console/cake Admin setSetting "GnuPG.homedir" "/var/www/MISP"
 
-        # Link MISP logs into /var/log/misp
         ln -sf /var/www/MISP/app/tmp/logs /var/log/misp
+
+        # Create MISP cron tab
+        echo "[-] INFO: Creating Cron entries for MISP in /etc/cron.d/misp..."
+        $CRON_USER_ID=1 # 1 = Admin
+        cat << EOF > /etc/cron.d/misp
+# Admin tasks - update components
+00 3 * * * www-data /var/www/MISP/app/Console/cake Admin updateGalaxies >>/var/log/misp-cron.log 2>>/var/log/misp-cron.log
+10 3 * * * www-data /var/www/MISP/app/Console/cake Admin updateTaxonomies >>/var/log/misp-cron.log 2>>/var/log/misp-cron.log
+20 3 * * * www-data /var/www/MISP/app/Console/cake Admin updateWarningLists >>/var/log/misp-cron.log 2>>/var/log/misp-cron.log
+30 3 * * * www-data /var/www/MISP/app/Console/cake Admin updateNoticeLists >>/var/log/misp-cron.log 2>>/var/log/misp-cron.log
+45 3 * * * www-data /var/www/MISP/app/Console/cake Admin updateObjectTemplates >>/var/log/misp-cron.log 2>>/var/log/misp-cron.log
+# Fetch feeds - a job for each feed
+15 *    * * *   root    /var/www/MISP/app/Console/cake Server fetchFeed "$CRON_USER_ID" 1 >>/var/log/misp-cron.log 2>>/var/log/misp-cron.log
+20 *    * * *   root    /var/www/MISP/app/Console/cake Server fetchFeed "$CRON_USER_ID" 2 >>/var/log/misp-cron.log 2>>/var/log/misp-cron.log
+25 *    * * *   root    /var/www/MISP/app/Console/cake Server fetchFeed "$CRON_USER_ID" 3 >>/var/log/misp-cron.log 2>>/var/log/misp-cron.log
+30 *    * * *   root    /var/www/MISP/app/Console/cake Server fetchFeed "$CRON_USER_ID" 4 >>/var/log/misp-cron.log 2>>/var/log/misp-cron.log
+35 *    * * *   root    /var/www/MISP/app/Console/cake Server fetchFeed "$CRON_USER_ID" 5 >>/var/log/misp-cron.log 2>>/var/log/misp-cron.log
+40 *    * * *   root    /var/www/MISP/app/Console/cake Server fetchFeed "$CRON_USER_ID" 6 >>/var/log/misp-cron.log 2>>/var/log/misp-cron.log
+45 *    * * *   root    /var/www/MISP/app/Console/cake Server fetchFeed "$CRON_USER_ID" 7 >>/var/log/misp-cron.log 2>>/var/log/misp-cron.log
+# Phishtank fetch job is less frequent - due to Phishtank limit
+50 */2  * * *   root    /var/www/MISP/app/Console/cake Server fetchFeed "$CRON_USER_ID" 8 >>/var/log/misp-cron.log 2>>/var/log/misp-cron.log
+# Cache all feeds
+55 *    * * *   root    /var/www/MISP/app/Console/cake Server cacheFeed "$CRON_USER_ID" all >>/var/log/misp-cron.log 2>>/var/log/misp-cron.log
+# TODO - Sync servers - uncomments these as needed
+#00 0 * * * www-data /var/www/MISP/app/Console/cake Server pull "$CRON_USER_ID" "$SYNCSERVER" >>/var/log/misp-cron.log 2>>/var/log/misp-cron.log
+#05 1 * * * www-data /var/www/MISP/app/Console/cake Server push "$CRON_USER_ID" "$SYNCSERVER" >>/var/log/misp-cron.log 2>>/var/log/misp-cron.log
+EOF
+        service cron start
 
         # Generate the admin user PGP key
         echo "[*] Creating admin GnuPG key..."
