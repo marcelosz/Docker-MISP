@@ -122,7 +122,8 @@ if [ -r /.firstboot.tmp ]; then
         else
                 echo "[-] Fixing the MISP base URL ($MISP_BASEURL)..."
                 sed -i "s/'baseurl' => '',/'baseurl' => '$MISP_BASEURL',/" $MISP_APP_CONFIG_PATH/config.php
-                /var/www/MISP/app/Console/cake Admin setSetting "MISP.baseurl" "$HOSTNAME"             
+                /var/www/MISP/app/Console/cake Admin setSetting "MISP.baseurl" "$MISP_BASEURL"       
+                /var/www/MISP/app/Console/cake Admin setSetting "MISP.external_baseurl" "$MISP_BASEURL"
         fi
 
         echo "[-] INFO: Setting Redis FQDN..."
@@ -169,6 +170,7 @@ if [ -r /.firstboot.tmp ]; then
 30 3 * * * www-data /var/www/MISP/app/Console/cake Admin updateNoticeLists >>/var/log/misp-cron.log 2>>/var/log/misp-cron.log
 45 3 * * * www-data /var/www/MISP/app/Console/cake Admin updateObjectTemplates >>/var/log/misp-cron.log 2>>/var/log/misp-cron.log
 # Fetch feeds - a job for each feed
+# TODO - Adjust these entries as needed. Double check to see if the feed IDs match.
 15 *    * * *   root    /var/www/MISP/app/Console/cake Server fetchFeed "$CRON_USER_ID" 1 >>/var/log/misp-cron.log 2>>/var/log/misp-cron.log
 20 *    * * *   root    /var/www/MISP/app/Console/cake Server fetchFeed "$CRON_USER_ID" 2 >>/var/log/misp-cron.log 2>>/var/log/misp-cron.log
 25 *    * * *   root    /var/www/MISP/app/Console/cake Server fetchFeed "$CRON_USER_ID" 3 >>/var/log/misp-cron.log 2>>/var/log/misp-cron.log
@@ -216,7 +218,7 @@ Your MISP docker has been successfully booted for the first time.
 Don't forget to:
 1) Check relay host $POSTFIX_RELAY_HOST SMTP settings
 2) Change the MISP admin email address to $MISP_ADMIN_EMAIL
-3) Adjust Cron settings (/etc/crontab of the core MISP container) to fetch feeds as needed
+3) Check cron settings (/etc/cron.d/misp) for the admin tasks and feed fetching as needed
 4) Do the fine tunning of your new MISP instance (organization name, users, sync user & servers, plugins, proxy, ...)
 
 __WELCOME__
