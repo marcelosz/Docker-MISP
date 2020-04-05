@@ -31,7 +31,7 @@ $ docker-compose up
 ```
 
 ### Building the core MISP Docker image
-# Clone the repository and get into its folder
+Clone the repository and get into its folder
 ```
 $ git clone https://github.com/marcelosz/Docker-MISP.git
 $ cd Docker-MISP
@@ -40,3 +40,6 @@ Build the core Docker image
 ```
 $ docker-compose -f docker-compose-build.yml build
 ```
+
+# Using Docker-MISP
+Docker-MISP is based on previous work by Xavier Mertens (@xme) and Jason Kendall (@collacid)
