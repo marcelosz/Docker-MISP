@@ -132,13 +132,9 @@ if [ -r /.firstboot.tmp ]; then
 
         echo "[-] INFO: PyMISP workarounds..."  
 
-        # Workaround to resolve PyMISP version conflict
-        pip3 uninstall stix
-        pip3 uninstall cybox 
-        pip3 uninstall mixbox
+        # Work around to resolve PyMISP version conflict
         cd /var/www/MISP/PyMISP
         python3 setup.py install
-
         # Work around https://github.com/MISP/MISP/issues/5608
         if [[ ! -f /var/www/MISP/PyMISP/pymisp/data/describeTypes.json ]]; then
                 mkdir -p /var/www/MISP/PyMISP/pymisp/data/
