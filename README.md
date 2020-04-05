@@ -41,5 +41,9 @@ Build the core Docker image
 $ docker-compose -f docker-compose-build.yml build
 ```
 
+# TODO
+Please check repository Issues for the current TODO list.
+
+
 # Acknowledgements
 Docker-MISP is based on previous work by Xavier Mertens (@xme) and Jason Kendall (@collacid).
