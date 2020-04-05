@@ -144,6 +144,12 @@ if [ -r /.firstboot.tmp ]; then
 
         /var/www/MISP/app/Console/cake Admin setSetting "Plugin.Cortex_services_enable" false
 
+        # Work around https://github.com/MISP/MISP/issues/5608
+        if [[ ! -f /var/www/MISP/PyMISP/pymisp/data/describeTypes.json ]]; then
+                mkdir -p /var/www/MISP/PyMISP/pymisp/data/
+                ln -s /usr/local/lib/python3.7/dist-packages/pymisp/data/describeTypes.json /var/www/MISP/PyMISP/pymisp/data/describeTypes.json
+        fi
+
         # Generate the admin user PGP key
         echo "[*] Creating admin GnuPG key..."
         if [ -z "$MISP_ADMIN_EMAIL" -o -z "$MISP_ADMIN_PASSPHRASE" ]; then
