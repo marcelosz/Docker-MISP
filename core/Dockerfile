@@ -1,9 +1,6 @@
 #
 # Dockerfile to build a MISP (https://github.com/MISP/MISP) container
 #
-ARG MISP_TAG=v2.4.124
-ARG MODULES_TAG=v2.4.121
-ARG PHP_VER=20180731
 
 #
 # Composer build
@@ -142,28 +139,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 #
 COPY --from=python-build /wheels /wheels
 RUN pip3 install --no-cache-dir /wheels/*.whl plyara pyzmq redis python-magic lief && rm -rf /wheels
-
-#
-# Build and Install MISP Modules
-# TODO - separate this in future versions
-#
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    virtualenv \
-    cmake \
-    git \
-    python3-dev \
-    build-essential \
-    pkg-config \
-    libpoppler-cpp-dev \
-    libfuzzy-dev \
-    libpq5 libjpeg-dev tesseract-ocr imagemagick libopencv-dev zbar-tools libzbar0 libzbar-dev \
-    && apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/*
-
-RUN git clone --branch ${MODULES_TAG} --depth 1  https://github.com/MISP/misp-modules.git /opt/misp-modules;
-
-WORKDIR /opt/misp-modules
-RUN pip3 install -I -r REQUIREMENTS
-RUN pip3 install .
 
 #
 # Download, install and configure MISP itself

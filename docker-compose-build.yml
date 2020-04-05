@@ -2,6 +2,16 @@ version: '3'
 
 services:
   misp:
-    image: marcelosz/misp:latest
+    image: marcelosz/misp:core-latest
     build:
         context: core/.
+        args:
+            - MISP_TAG=${MISP_TAG}
+            - PHP_VER=${PHP_VER}
+
+  misp-modules:
+    image: marcelosz/misp:modules-latest
+    build:
+        context: modules/.
+        args:
+            - MODULES_TAG=${MODULES_TAG}

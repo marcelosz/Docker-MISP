@@ -26,13 +26,23 @@ services:
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
 
+  modules:
+    container_name: misp_modules
+    image: coolacid/misp:modules-latest
+    environment:
+      - "REDIS_BACKEND=redis"
+    depends_on:
+      - redis
+      - db
+
   core:
     depends_on:
       - db
       - redis
       - mail
+      - modules
     container_name: misp_core
-    image: marcelosz/misp:latest
+    image: marcelosz/misp:core-latest
     restart: unless-stopped
     volumes:
       - /dev/urandom:/dev/random

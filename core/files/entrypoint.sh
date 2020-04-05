@@ -132,8 +132,8 @@ if [ -r /.firstboot.tmp ]; then
 
         echo "[-] INFO: PyMISP workarounds..."
         # Work around to resolve PyMISP version conflict
-        cd /var/www/MISP/PyMISP
-        python3 setup.py install
+        #cd /var/www/MISP/PyMISP
+        #python3 setup.py install
         # Work around https://github.com/MISP/MISP/issues/5608
         if [[ ! -f /var/www/MISP/PyMISP/pymisp/data/describeTypes.json ]]; then
                 mkdir -p /var/www/MISP/PyMISP/pymisp/data/
@@ -144,13 +144,13 @@ if [ -r /.firstboot.tmp ]; then
         /var/www/MISP/app/Console/cake Admin setSetting "MISP.python_bin" $(which python3)
 
         /var/www/MISP/app/Console/cake Admin setSetting "Plugin.Enrichment_services_enable" true
-        /var/www/MISP/app/Console/cake Admin setSetting "Plugin.Enrichment_services_url" "http://localhost"
+        /var/www/MISP/app/Console/cake Admin setSetting "Plugin.Enrichment_services_url" "http://misp_modules"
 
         /var/www/MISP/app/Console/cake Admin setSetting "Plugin.Import_services_enable" true
-        /var/www/MISP/app/Console/cake Admin setSetting "Plugin.Import_services_url" "http://localhost"
+        /var/www/MISP/app/Console/cake Admin setSetting "Plugin.Import_services_url" "http://misp_modules"
 
         /var/www/MISP/app/Console/cake Admin setSetting "Plugin.Export_services_enable" true
-        /var/www/MISP/app/Console/cake Admin setSetting "Plugin.Export_services_url" "http://localhost"
+        /var/www/MISP/app/Console/cake Admin setSetting "Plugin.Export_services_url" "http://misp_modules"
 
         /var/www/MISP/app/Console/cake Admin setSetting "Plugin.Cortex_services_enable" false
 
