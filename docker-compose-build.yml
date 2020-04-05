@@ -7,7 +7,6 @@ services:
         context: core/.
         args:
             - MISP_TAG=${MISP_TAG}
-            - PHP_VER=${PHP_VER}
 
   misp-modules:
     image: marcelosz/misp:modules-latest
