@@ -2,7 +2,7 @@
 [![Build Status](https://travis-ci.org/marcelosz/Docker-MISP.svg?branch=master)](https://travis-ci.org/marcelosz/Docker-MISP)
 ![Docker Build](https://github.com/marcelosz/Docker-MISP/workflows/Docker%20Image%20CI/badge.svg)
 
-Docker-MISP provides base files (Dockerfile, ...) for creating and running a [MISP](http://www.misp-project.org) instance with simple Docker images.
+Docker-MISP provides base files (Dockerfile, ...) for creating and running [MISP](http://www.misp-project.org) instances with simple Docker images.
 
 Main features:
 - Ready to download, deploy and use
