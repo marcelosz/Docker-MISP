@@ -27,4 +27,4 @@ WORKDIR /opt/misp-modules
 RUN pip3 install -I -r REQUIREMENTS
 RUN pip3 install .
 
-ENTRYPOINT [ "/opt/misp-modules/bin/misp-modules", "-l", "0.0.0.0"]
+ENTRYPOINT [ "misp-modules", "-l", "0.0.0.0"]

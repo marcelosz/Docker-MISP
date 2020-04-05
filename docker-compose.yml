@@ -28,7 +28,7 @@ services:
 
   modules:
     container_name: misp_modules
-    image: coolacid/misp:modules-latest
+    image: marcelosz/misp:modules-latest
     environment:
       - "REDIS_BACKEND=redis"
     depends_on:
