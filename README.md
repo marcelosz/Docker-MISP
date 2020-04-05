@@ -11,7 +11,7 @@ Main features:
 - Built-in misp-modules component
 - Built-in persistent volumes configuration
 
-The main Dockerfile is already integrated to Docker Hub, so you can download images directly from [there](https://hub.docker.com/repository/docker/marcelosz/misp). 
+The main Dockerfile is already integrated to Docker Hub, so you can download images directly from [there](https://hub.docker.com/repository/docker/marcelosz/misp), simply using **marcelosz/misp:latest** for example. 
 
 # Using Docker-MISP
 ### Deploying a new MISP instance
