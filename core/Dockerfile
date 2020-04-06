@@ -147,8 +147,8 @@ WORKDIR /var/www
 RUN chown www-data:www-data /var/www
 USER www-data
 # If we specify --branch we won't be able to update MISP from the UI "Server Settings & Maintenance"
-#RUN git clone --branch ${MISP_TAG} --depth 1 https://github.com/MISP/MISP.git
-RUN git clone https://github.com/MISP/MISP.git
+RUN git clone --branch ${MISP_TAG} --depth 1 https://github.com/MISP/MISP.git
+#RUN git clone https://github.com/MISP/MISP.git
 WORKDIR /var/www/MISP
 RUN git submodule update --init --recursive ;
 RUN git submodule foreach --recursive git config core.filemode false ;
