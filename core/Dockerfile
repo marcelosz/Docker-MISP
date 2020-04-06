@@ -1,7 +1,6 @@
 #
 # Dockerfile to build a MISP (https://github.com/MISP/MISP) container
 #
-ARG PHP_VER=20180731
 
 #
 # Composer build

@@ -6,6 +6,7 @@ services:
     build:
         context: core/.
         args:
+            - PHP_VER=${PHP_VER}
             - MISP_TAG=${MISP_TAG}
 
   misp-modules:
