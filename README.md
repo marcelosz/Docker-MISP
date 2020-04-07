@@ -40,8 +40,8 @@ Build the core Docker image
 $ docker-compose -f docker-compose-build.yml build
 ```
 > **Important**:
-> Although a MISP_TAG variable exists, Docker-MISP does not currently uses a specific MISP version. The latest version from the Github repository is used during image build time. On the other hand, misp-modules is enforced (based on MODULES_TAG variable). 
-> Docker Hub builds are based on this logic. See CHANGELOG to see the software versions used in the Docker Hub build release.
+> Although a MISP_TAG variable exists, Docker-MISP does not currently uses a specific MISP version. The latest version available in the Github repository is used during image build time. On the other hand, misp-modules version is indeed enforced (based on MODULES_TAG variable).
+> Docker Hub builds are based on this logic. See CHANGELOG to check the software versions used in the Docker Hub build release.
 
 ## CHANGELOG
 ### \[1.0.0\] - 2020-04-06
