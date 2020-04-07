@@ -12,7 +12,7 @@ Main features:
 
 The main Dockerfile is already integrated to Docker Hub, so you can download images directly from [there](https://hub.docker.com/repository/docker/marcelosz/misp), simply using **marcelosz/misp:core-latest** and **marcelosz/misp:modules-latest** for example.
 
-# Using Docker-MISP
+## Using Docker-MISP
 ### Deploying a new MISP instance
 Clone the repository and get into its folder
 ```
@@ -39,10 +39,18 @@ Build the core Docker image
 ```
 $ docker-compose -f docker-compose-build.yml build
 ```
+> **Important**:
+> Although a MISP_TAG variable exists, Docker-MISP does not currently uses a specific MISP version. The latest version from the Github repository is used during image build time. On the other hand, misp-modules is enforced (based on MODULES_TAG variable). 
+> Docker Hub builds are based on this logic. See CHANGELOG to see the software versions used in the Docker Hub build release.
 
-# TODO
+## CHANGELOG
+### \[1.0.0\] - 2020-04-06
+  - First production-ready release!
+  - Current software versions: MISP v2.4.124 and misp-modules v2.4.121
+
+## TODO
 Please check repository [Issues](https://github.com/marcelosz/Docker-MISP/issues) for the current TODO list.
 
 
-# Acknowledgements
+## Acknowledgements
 Docker-MISP is based on previous work by Xavier Mertens (@xme) and Jason Kendall (@collacid).
