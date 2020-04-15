@@ -6,7 +6,7 @@ Docker-MISP provides base files (Dockerfile, ...) for creating and running [MISP
 
 Main features:
 - Ready to download, deploy and use
-- YAML file for 'docker-compose up', to easily deploy a MISP instance as a Docker container stack (with separate mis-modules, MySQL, Redis and Mail server containers)
+- YAML file for 'docker-compose up', to easily deploy a MISP instance as a Docker container stack (with separate misp-modules, MySQL, Redis and Mail server containers)
 - YAML file for 'docker-compose build', to help building the core MISP and the MISP Modules Docker images from scratch
 - Built-in persistent volumes configuration
 
