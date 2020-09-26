@@ -35,6 +35,11 @@ Clone the repository and get into its folder
 $ git clone https://github.com/marcelosz/Docker-MISP.git
 $ cd Docker-MISP
 ```
+Copy template.env to .env and edit the tags (PHP_VER, MISP_TAG, MODULES_TAG) as needed (see comment below)
+```
+$ cp template.env .env
+$ vi .env
+```
 Build the core Docker image
 ```
 $ docker-compose -f docker-compose-build.yml build
@@ -44,6 +49,8 @@ $ docker-compose -f docker-compose-build.yml build
 > Docker Hub builds are based on this logic. See CHANGELOG to check the software versions used in the Docker Hub build release.
 
 ## CHANGELOG
+### \[1.1.0\] - 2020-09-26
+  - MISP version updated to v2.4.132
 ### \[1.0.1\] - 2020-04-14
   - Minor Docker automated build issues fixed
 ### \[1.0.0\] - 2020-04-06
