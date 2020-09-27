@@ -28,6 +28,7 @@ Deploy the Docker stack using docker-compose
 ```
 $ docker-compose up
 ```
+For instructions on how to setup MISP after installation, check https://github.com/marcelosz/Docker-MISP/wiki/How-to-install-MISP-using-Docker-MISP
 
 ### Building the core MISP Docker image
 Clone the repository and get into its folder
