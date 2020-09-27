@@ -49,6 +49,8 @@ $ docker-compose -f docker-compose-build.yml build
 > Docker Hub builds are based on this logic. See CHANGELOG to check the software versions used in the Docker Hub build release.
 
 ## CHANGELOG
+### \[1.1.1\] - 2020-09-27
+  - Minor issues fixed
 ### \[1.1.0\] - 2020-09-26
   - MISP version updated to v2.4.132
 ### \[1.0.1\] - 2020-04-14

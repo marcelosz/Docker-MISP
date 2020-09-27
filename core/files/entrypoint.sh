@@ -66,11 +66,11 @@ if [ -r /.firstboot.tmp ]; then
                 exit 1
         fi
 		
-		# Waiting for DB to be ready
-		while ! mysqladmin ping -h"$MYSQL_HOST" --silent; do
-		    sleep 5
-			echo "[-] INFO: Waiting for database to be ready..."
-		done
+	# Waiting for DB to be ready
+        while ! mysqladmin ping -h"$MYSQL_HOST" -u"$MYSQL_ROOT_USER" -p"$MYSQL_ROOT_PASSWORD" --silent; do
+	        sleep 5
+		echo "[-] INFO: Waiting for database to be ready..."
+        done
 		
         # Set MYSQL_PASSWORD
         if [ -z "$MYSQL_PASSWORD" ]; then
@@ -145,15 +145,15 @@ if [ -r /.firstboot.tmp ]; then
         echo "[-] INFO: Adjusting other MISP settings..."
         /var/www/MISP/app/Console/cake Admin setSetting "MISP.python_bin" $(which python3)
 
+        /var/www/MISP/app/Console/cake Admin setSetting "Plugin.Enrichment_services_url" "http://misp_modules"
         /var/www/MISP/app/Console/cake Admin setSetting "Plugin.Enrichment_services_enable" true
         /var/www/MISP/app/Console/cake Admin setSetting "Plugin.Enrichment_hover_enable" true        
-        /var/www/MISP/app/Console/cake Admin setSetting "Plugin.Enrichment_services_url" "http://misp_modules"
 
-        /var/www/MISP/app/Console/cake Admin setSetting "Plugin.Import_services_enable" true
         /var/www/MISP/app/Console/cake Admin setSetting "Plugin.Import_services_url" "http://misp_modules"
+        /var/www/MISP/app/Console/cake Admin setSetting "Plugin.Import_services_enable" true
 
-        /var/www/MISP/app/Console/cake Admin setSetting "Plugin.Export_services_enable" true
         /var/www/MISP/app/Console/cake Admin setSetting "Plugin.Export_services_url" "http://misp_modules"
+        /var/www/MISP/app/Console/cake Admin setSetting "Plugin.Export_services_enable" true
 
         /var/www/MISP/app/Console/cake Admin setSetting "Plugin.Cortex_services_enable" false
 
@@ -228,8 +228,8 @@ __WELCOME__
         rm -f /.firstboot.tmp
 fi
 
-# Start syslog-ng, cron and postfix
-service syslog-ng start
+# Start rsyslog, cron and postfix
+service rsyslog start
 service cron start
 service postfix start
 

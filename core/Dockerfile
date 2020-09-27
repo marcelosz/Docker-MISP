@@ -111,6 +111,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     php-mysql \
     php-redis \
     php-gd \
+    php-zip \    
+    php-intl \
     # Python Requirements
     python3 \
     python3-setuptools \
@@ -128,7 +130,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     postfix \    
     cron \
     logrotate \
-    syslog-ng-core \
+    rsyslog \
     ssdeep \
     libfuzzy2 \    
     mariadb-client \
@@ -208,9 +210,6 @@ RUN rm -rf taxonomies && git clone https://github.com/MISP/misp-taxonomies.git .
 # Supervisord conf file
 #
 COPY files/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-
-# Modify syslog configuration
-RUN sed -i -E 's/^(\s*)system\(\);/\1unix-stream("\/dev\/log");/' /etc/syslog-ng/syslog-ng.conf
 
 # Trigger to perform first boot operations
 RUN touch /.firstboot.tmp
