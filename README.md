@@ -24,10 +24,15 @@ Copy template.env to .env and edit the environment variables as needed (related 
 $ cp template.env .env
 $ vi .env
 ```
-Deploy the Docker stack using docker-compose
+Deploy the Docker stack using docker-compose (pure Apache HTTP Server option)
 ```
 $ docker-compose up
 ```
+or (for a nginx reverse proxy with ModSecurity and Certbot)
+```
+$ docker-compose -f docker-compose-nginx.yml up
+```
+
 For instructions on how to setup MISP after installation, check https://github.com/marcelosz/Docker-MISP/wiki/How-to-install-MISP-using-Docker-MISP
 
 ### Building the core MISP Docker image
@@ -50,6 +55,9 @@ $ docker-compose -f docker-compose-build.yml build
 > Docker Hub builds are based on this logic. See CHANGELOG to check the software versions used in the Docker Hub build release.
 
 ## CHANGELOG
+### \[1.1.2\] - 2020-09-28
+  - Port 80 is not exposed by default anymore
+  - Added docker-compose-nginx.yml as an option to spin up a stack with nginx (plus ModSecurity and Certbot)
 ### \[1.1.1\] - 2020-09-27
   - Minor issues fixed
 ### \[1.1.0\] - 2020-09-26
