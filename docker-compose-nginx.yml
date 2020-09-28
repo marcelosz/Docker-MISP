@@ -18,6 +18,12 @@ services:
       - SMARTHOST_PASSWORD=${MAIL_SMARTHOST_PASSWORD}
       - SMARTHOST_ALIASES=${MAIL_SMARTHOST_ALIASES}
 
+  nginx:
+    # This is a nginx container that will act as a reverse proxy for MISP. Comes with ModSecurity and Certbot
+    # See: https://hub.docker.com/r/marcelosz/nginx-modsecurity
+    container_name: misp_nginx
+    image: marcelosz/nginx-modsecurity
+
   redis:
     container_name: misp_redis    
     image: redis:5.0
@@ -52,6 +58,7 @@ services:
       - db
       - redis
       - mail
+      - nginx
       - modules
     container_name: misp_core
     image: marcelosz/misp:core-latest

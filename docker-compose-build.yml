@@ -8,7 +8,6 @@ services:
         args:
             - PHP_VER=${PHP_VER}
             - MISP_TAG=${MISP_TAG}
-
   misp-modules:
     image: marcelosz/misp:modules-latest
     build:

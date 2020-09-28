@@ -9,7 +9,7 @@ set -e
 echo "[*] Starting entrypoint.sh"
 
 if [ -r /.firstboot.tmp ]; then
-        echo "[*] Container started for the fist time. Setup might time a few minutes."
+        echo "[*] Container started for the fist time. Setup might take a few minutes."
         echo "[*] (Details are logged in /tmp/install.log)"
         export DEBIAN_FRONTEND=noninteractive
 
